@@ -11,7 +11,7 @@ int main()
     std::vector<int> :: iterator end = v.end();
     lab_16::parallel_sort<std::vector<int>::iterator>(3, beg, end);
     for (auto i : v) {
-	std::cout << i << " " << std::endl;
+	std::cout << i << " ";
     }
     return 0;
 }

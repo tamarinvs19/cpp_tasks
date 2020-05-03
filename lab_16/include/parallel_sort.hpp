@@ -3,6 +3,7 @@
 #include <iterator>
 #include <algorithm>
 #include <vector>
+#include <functional>
 
 namespace lab_16 {
 
@@ -17,24 +18,24 @@ void expansion_merge(RandomIt first1, RandomIt last1, RandomIt last2) {
     }
 }
 
-template<class RandomIt>
-void merge_sort(RandomIt first, RandomIt last) {
+template<class RandomIt, class Compare>
+void merge_sort(RandomIt first, RandomIt last, Compare comp = Compare()) {
     if (last - first > 2) {
 	std::size_t d_mid = (last - first)/2;
 
-	merge_sort(first, first + d_mid);
-	merge_sort(first + d_mid, last);
+	merge_sort(first, first + d_mid, comp);
+	merge_sort(first + d_mid, last, comp);
 	expansion_merge(first, first + d_mid, last);
     }
-    else if (last - first == 2 && *first > *(last - 1)) {
+    else if (last - first == 2 && comp(*(last - 1), *first)) {
 	std::swap(*(last - 1), *first);
     }
 }
 
 }
 
-template<class RandomIt>
-void parallel_sort(std::size_t nthreads, RandomIt first, RandomIt last) {
+template<class RandomIt, class Compare>
+void parallel_sort(std::size_t nthreads, RandomIt first, RandomIt last, Compare comp = Compare()) {
     std::vector<std::thread> vt;
     std::size_t step = (last - first) / nthreads;
     std::vector<RandomIt> borders(nthreads + 1);
@@ -47,7 +48,7 @@ void parallel_sort(std::size_t nthreads, RandomIt first, RandomIt last) {
     }
 
     for (std::size_t i = 0; i < nthreads; ++i) {
-	vt.emplace_back(inner::merge_sort<RandomIt>, borders[i], borders[i+1]);
+	vt.emplace_back(inner::merge_sort<RandomIt, Compare>, borders[i], borders[i+1], comp);
     }
 
     for (std::size_t i = 0; i < nthreads; ++i) {
@@ -56,9 +57,10 @@ void parallel_sort(std::size_t nthreads, RandomIt first, RandomIt last) {
     }
 }
 
-template<class RandomIt, class Compare>
-void parallel_sort(std::size_t nthreads, RandomIt first, RandomIt last, Compare comp);
-
+template<class RandomIt>
+void parallel_sort(std::size_t nthreads, RandomIt first, RandomIt last) {
+    parallel_sort<RandomIt, std::less<>>(nthreads, first, last, std::less<>());
+}
 
 }
 
