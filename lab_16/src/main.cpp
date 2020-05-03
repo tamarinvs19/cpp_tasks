@@ -9,7 +9,7 @@ int main()
     std::vector<int> sorted_v = {1, 2, 4, 5, 8, 9};
     std::vector<int> :: iterator beg = v.begin();
     std::vector<int> :: iterator end = v.end();
-    lab_16::parallel_sort<std::vector<int>::iterator>(3, beg, end);
+    lab_16::parallel_sort<std::vector<int>::iterator>(3, beg, end, [](int x, int y){return x > y;});
     for (auto i : v) {
 	std::cout << i << " ";
     }

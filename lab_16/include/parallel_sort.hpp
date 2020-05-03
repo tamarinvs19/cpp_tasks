@@ -9,10 +9,10 @@ namespace lab_16 {
 
 namespace inner {
 
-template<class RandomIt>
-void expansion_merge(RandomIt first1, RandomIt last1, RandomIt last2) {
+template<class RandomIt, class Compare>
+void expansion_merge(RandomIt first1, RandomIt last1, RandomIt last2, Compare comp = Compare()) {
     std::vector<typename std::iterator_traits<RandomIt>::value_type> merge_vec(last2 - first1);
-    std::merge(first1, last1, last1, last2, merge_vec.begin());
+    std::merge(first1, last1, last1, last2, merge_vec.begin(), comp);
     for (RandomIt i = merge_vec.begin(), j = first1; i < merge_vec.end(); ++i, ++j) {
 	std::swap(*j, *i);
     }
@@ -25,7 +25,7 @@ void merge_sort(RandomIt first, RandomIt last, Compare comp = Compare()) {
 
 	merge_sort(first, first + d_mid, comp);
 	merge_sort(first + d_mid, last, comp);
-	expansion_merge(first, first + d_mid, last);
+	expansion_merge(first, first + d_mid, last, comp);
     }
     else if (last - first == 2 && comp(*(last - 1), *first)) {
 	std::swap(*(last - 1), *first);
@@ -53,7 +53,7 @@ void parallel_sort(std::size_t nthreads, RandomIt first, RandomIt last, Compare 
 
     for (std::size_t i = 0; i < nthreads; ++i) {
 	vt[i].join();
-	inner::expansion_merge(first, borders[i], borders[i+1]);
+	inner::expansion_merge(first, borders[i], borders[i+1], comp);
     }
 }
 
